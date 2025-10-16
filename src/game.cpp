@@ -118,6 +118,9 @@ void Game::run()
                                      turn, cursorX, cursorY, getElapsedSeconds(), boardSize);
                 
                 // Show game over message
+                // Display winner/tie message
+                isWinner(20,20);
+
                 move_cursor(4, 25);
                 setTextColor(TextColor::BRIGHT_WHITE);
                 cout << "Game over! Press Q to quit or R to restart.";
@@ -144,8 +147,8 @@ void Game::showMenu()
 {
     clearScreen();
 
-    
     setTextColor(TextColor::YELLOW);
+    cout << endl << endl;
     cout << " ██████╗ ████████╗██╗  ██╗███████╗██╗     ██╗      ██████╗ " << endl;
     cout << "██╔═══██╗╚══██╔══╝██║  ██║██╔════╝██║     ██║     ██╔═══██╗" << endl;
     cout << "██║   ██║   ██║   ███████║█████╗  ██║     ██║     ██║   ██║" << endl;
@@ -223,21 +226,28 @@ int Game::getElapsedSeconds() const
     return (int)elapsed.count();
 }
 
-void Game::isWinner() {
+void Game::isWinner(int posX, int posY) {
     // Determine winner based on current board counts
     if (!board) return;
     int countX = board->count(Board::Disk::X);
     int countO = board->count(Board::Disk::O);
 
     string msg;
-    if (countX > countO) msg = "Player X wins!";
-    else if (countO > countX) msg = "Player O wins!";
+    if (countX > countO) msg = string("Player ") + BLACK_CIRCLE + " wins!";
+    else if (countO > countX) msg = string("Player ") + WHITE_CIRCLE + " wins!";
     else msg = "It's a tie!";
 
-    int cols = 80, rows = 24;
-    get_terminal_size(cols, rows);
-    int cx = cols / 2 - (int)msg.size() / 2;
-    int cy = rows / 2;
+    int cx = posX;
+    int cy = posY;
+    if (cx < 0 || cy < 0) {
+        int cols = 80, rows = 24;
+        if (get_terminal_size(cols, rows)) {
+            cx = cols / 2 - (int)msg.size() / 2;
+            cy = rows / 2;
+        } else {
+            cx = 10; cy = 10; // fallback
+        }
+    }
 
     move_cursor(max(1, cx), max(1, cy));
     setTextColor(TextColor::BRIGHT_GREEN);

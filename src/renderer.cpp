@@ -21,6 +21,8 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
     
     // Draw title
     setTextColor(TextColor::YELLOW);
+
+    cout << endl << endl;
     cout << " ██████╗ ████████╗██╗  ██╗███████╗██╗     ██╗      ██████╗ " << endl;
     cout << "██╔═══██╗╚══██╔══╝██║  ██║██╔════╝██║     ██║     ██╔═══██╗" << endl;
     cout << "██║   ██║   ██║   ███████║█████╗  ██║     ██║     ██║   ██║" << endl;
@@ -34,7 +36,7 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
 
     // Draw board with box drawing characters
     int boardSize = b.getSize();
-    int boardTop = 8;
+    int boardTop = 10;
     int boardLeft = 4;
     
     // Top border
@@ -144,7 +146,7 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
 void Renderer::drawSideMenu(const vector<MoveRecord>& history, int scoreX, int scoreO, 
                            Board::Disk currentTurn, int cursorX, int cursorY, int elapsedSeconds, int boardSize) const
 {
-    int menuY = 8;
+    int menuY = 10;
 
     // Calculate board width in characters: each cell is 3 chars plus vertical lines
     int boardCharWidth = boardSize * 4 + 1; // approximate

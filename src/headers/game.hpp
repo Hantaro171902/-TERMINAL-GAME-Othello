@@ -26,7 +26,8 @@ public:
     void showMenu();
     void resetGame();
     int getElapsedSeconds() const;
-    void isWinner();
+    // Show winner message. If posX/posY >= 0 they specify the column,row to print the message.
+    void isWinner(int posX = -1, int posY = -1);
 };
 
 
