@@ -18,6 +18,9 @@ void sleep_ms(int ms);
 int random_range(int min, int max);
 std::string formatTime(int totalSeconds);
 
+// Get current terminal dimensions (cols, rows). Returns true on success.
+bool get_terminal_size(int &cols, int &rows);
+
 void move_cursor(int x, int y);
 void play_sound(const std::string& path);
 

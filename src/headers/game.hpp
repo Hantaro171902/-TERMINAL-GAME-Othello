@@ -6,6 +6,7 @@
 #include "board.hpp"
 #include "renderer.hpp"
 #include "cursor_input.hpp"
+#include "utils.hpp"
 
 class Game {
     Board* board;
@@ -25,6 +26,7 @@ public:
     void showMenu();
     void resetGame();
     int getElapsedSeconds() const;
+    void isWinner();
 };
 
 

@@ -17,15 +17,20 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
                          int cursorX, int cursorY) const
 {
     clearScreen();
+    clearTerminal();
     
     // Draw title
     setTextColor(TextColor::YELLOW);
-    cout << "                  ______     __  __     _____     ______     __  __     __  __    \n";
-    cout << "                 /\\  ___\\   /\\ \\/\\ \\   /\\  __-.  /\\  __ \\   /\\ \\/ /    /\\ \\/\\ \\   \n";
-    cout << "                 \\ \\___  \\  \\ \\ \\_\\ \\  \\ \\ \\/\\ \\ \\ \\ \\/\\ \\  \\ \\  _\"-.  \\ \\ \\_\\ \\  \n";
-    cout << "                  \\/\\_____\\  \\ \\_____\\  \\ \\____-  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_____\\ \n";
-    cout << "                   \\/_____/   \\/_____/   \\/____/   \\/_____/   \\/_/\\/_/   \\/_____/ \n";
+    cout << " ██████╗ ████████╗██╗  ██╗███████╗██╗     ██╗      ██████╗ " << endl;
+    cout << "██╔═══██╗╚══██╔══╝██║  ██║██╔════╝██║     ██║     ██╔═══██╗" << endl;
+    cout << "██║   ██║   ██║   ███████║█████╗  ██║     ██║     ██║   ██║" << endl;
+    cout << "██║   ██║   ██║   ██╔══██║██╔══╝  ██║     ██║     ██║   ██║" << endl;
+    cout << "╚██████╔╝   ██║   ██║  ██║███████╗███████╗███████╗╚██████╔╝" << endl;
+    cout << " ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝ " << endl;               
+                 
     resetTextColor();
+
+    cout << endl << endl;
 
     // Draw board with box drawing characters
     int boardSize = b.getSize();
@@ -34,7 +39,7 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
     
     // Top border
     move_cursor(boardLeft, boardTop);
-    setTextColor(TextColor::YELLOW);
+    setTextColor(TextColor::WHITE);
     cout << SYMBOL_DOUBLE_TOP_LEFT;
     for (int i = 0; i < boardSize; i++) {
         cout << SYMBOL_DOUBLE_HORIZONTAL << SYMBOL_DOUBLE_HORIZONTAL << SYMBOL_DOUBLE_HORIZONTAL;
@@ -55,7 +60,21 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
             
             if (isCursor) {
                 setTextColor(TextColor::BRIGHT_WHITE);
-                cout << "[" << (d == Board::Disk::X ? BLACK_CIRCLE : d == Board::Disk::O ? WHITE_CIRCLE : " ") << "]";
+                cout << "[";
+                if (d == Board::Disk::X) {
+                    setTextColor(TextColor::RED);
+                    cout << BLACK_CIRCLE;
+                    resetTextColor();
+                }
+                else if (d == Board::Disk::O) {
+                    setTextColor(TextColor::GREEN);
+                    cout << WHITE_CIRCLE;
+                    resetTextColor();
+                } 
+                else {
+                    cout << ' ';
+                }
+                cout << "]";
             } else {
                 if (d == Board::Disk::X) {
                     cout << " " << BLACK_CIRCLE << " ";
@@ -64,7 +83,10 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
                     cout << " " << WHITE_CIRCLE << " ";
                 }
                 else if (isValidMove) {
+                    // draw possible move dot in blue
+                    setTextColor(TextColor::BRIGHT_BLUE);
                     cout << " . ";
+                    resetTextColor();
                 }
                 else {
                     cout << "   ";
@@ -87,7 +109,7 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
     }
 
     // Bottom border
-    move_cursor(boardLeft, boardTop + 1 + boardSize * 2);
+    move_cursor(boardLeft, boardTop + boardSize * 2);
     cout << SYMBOL_DOUBLE_BOTTOM_LEFT;
     for (int i = 0; i < boardSize; i++) {
         cout << SYMBOL_DOUBLE_HORIZONTAL << SYMBOL_DOUBLE_HORIZONTAL << SYMBOL_DOUBLE_HORIZONTAL;
@@ -95,28 +117,55 @@ void Renderer::drawBoard(const Board & b, const vector<pair<int,int>> & valid, B
     }
     cout << SYMBOL_DOUBLE_BOTTOM_RIGHT;
 
+    // Ensure output is flushed so the terminal receives the full board immediately
+    cout << flush;
+
     // Draw coordinates
     setTextColor(TextColor::YELLOW);
+    // Draw column coordinates (handle 1..9 and 10)
     for (int i = 0; i < boardSize; i++) {
         move_cursor(boardLeft + 2 + i * 4, boardTop - 1);
-        cout << (char)('1' + i);
+        if (i + 1 < 10)
+            cout << (i + 1);
+        else
+            cout << (i + 1); // two-digit will occupy more space but move_cursor positions are approximate
     }
+    // Draw row coordinates
     for (int i = 0; i < boardSize; i++) {
-        move_cursor(boardLeft - 2, boardTop + 1 + i * 2);
-        cout << (char)('1' + i);
+        move_cursor(boardLeft - 3, boardTop + 1 + i * 2);
+        if (i + 1 < 10)
+            cout << (i + 1);
+        else
+            cout << (i + 1);
     }
     resetTextColor();
 }
 
 void Renderer::drawSideMenu(const vector<MoveRecord>& history, int scoreX, int scoreO, 
-                           Board::Disk currentTurn, int cursorX, int cursorY, int elapsedSeconds) const
+                           Board::Disk currentTurn, int cursorX, int cursorY, int elapsedSeconds, int boardSize) const
 {
-    int menuX = 45;
     int menuY = 8;
+
+    // Calculate board width in characters: each cell is 3 chars plus vertical lines
+    int boardCharWidth = boardSize * 4 + 1; // approximate
+
+    // Try to place menu to the right of the board; if terminal is small or board is large,
+    // push menu further right or to the far right edge
+    int termCols = 0, termRows = 0;
+    if (!get_terminal_size(termCols, termRows)) termCols = 120; // fallback
+
+    int boardLeft = 4;
+    int proposedMenuX = boardLeft + boardCharWidth + 4;
+    int menuX = proposedMenuX;
+    if (menuX + 40 > termCols) {
+        // shift menu to fit within terminal
+        menuX = max(boardLeft + boardCharWidth + 2, termCols - 48);
+        if (menuX < boardLeft + boardCharWidth + 1) menuX = boardLeft + boardCharWidth + 1;
+    }
     
     // Draw score and timer
     move_cursor(menuX, menuY);
-    setTextColor(TextColor::YELLOW);
+    setTextColor(TextColor::WHITE);
     cout << "╔═══════╦════╦═════╦═════╦════╦═══════╗";
     move_cursor(menuX, menuY + 1);
     cout << "║ " << formatTime(elapsedSeconds) << " ║ " << setw(2) << scoreX << " ║  " << BLACK_CIRCLE << "  ║  " << WHITE_CIRCLE << "  ║ " << setw(2) << scoreO << " ║ " << formatTime(elapsedSeconds) << " ║";
@@ -148,7 +197,7 @@ void Renderer::drawSideMenu(const vector<MoveRecord>& history, int scoreX, int s
 void Renderer::drawInstructions(int x, int y) const
 {
     move_cursor(x, y);
-    setTextColor(TextColor::YELLOW);
+    setTextColor(TextColor::WHITE);
     cout << "╔═════════════════════════════════════╗";
     move_cursor(x, y + 1);
     cout << "║ ↑←↓→  : Move cursor    ENTER : Place║";
@@ -164,7 +213,7 @@ void Renderer::drawInstructions(int x, int y) const
 void Renderer::drawMoveHistory(const vector<MoveRecord>& history, int x, int y, int scrollOffset) const
 {
     move_cursor(x, y);
-    setTextColor(TextColor::YELLOW);
+    setTextColor(TextColor::WHITE);
     cout << "              Historical moves";
     move_cursor(x, y + 1);
     cout << "╔─────────────────────────────────────╗";
@@ -194,7 +243,7 @@ void Renderer::drawMoveHistory(const vector<MoveRecord>& history, int x, int y, 
     // Fill empty lines if needed
     for (int i = endIdx - startIdx; i < maxMoves; i++) {
         move_cursor(x, y + 2 + i);
-        cout << "║                                   ║";
+        cout << "║                                     ║";
     }
     
     move_cursor(x, y + 2 + maxMoves);

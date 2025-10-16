@@ -14,6 +14,8 @@
 #include <termios.h>
 #include <fcntl.h>
 #endif
+#include <sys/ioctl.h>
+#include <sys/types.h>
 
 using namespace std;
 
@@ -50,6 +52,20 @@ void clearTerminal() {
     system("cls");
 #else
     cout << "\033c"; // Full reset
+    cout << "\033[1;1H"; // ensure cursor at top-left
+#endif
+}
+
+bool get_terminal_size(int &cols, int &rows) {
+#ifdef _WIN32
+    // Not implemented for Windows here
+    return false;
+#else
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == -1) return false;
+    cols = w.ws_col;
+    rows = w.ws_row;
+    return true;
 #endif
 }
 
@@ -186,5 +202,8 @@ const char BLOCK_FULL[]   = "\u2588"; // █
 const char BLOCK_HALF[]   = "\u2592"; // ▒
 
 // Othello game symbols
-const char WHITE_CIRCLE[] = "\u25EF"; // ◯
-const char BLACK_CIRCLE[] = "\u2B24"; // ⬤
+// Use single-width circle glyphs that render consistently in most terminals.
+// Use WHITE_CIRCLE = ○ (U+25CB) and BLACK_CIRCLE = ● (U+25CF).
+// These are generally a good fit visually next to ASCII characters.
+const char WHITE_CIRCLE[] = "\u25CB"; // ○
+const char BLACK_CIRCLE[] = "\u25CF"; // ●
