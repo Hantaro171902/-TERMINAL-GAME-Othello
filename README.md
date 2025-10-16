@@ -1,4 +1,4 @@
-# Othello — Terminal Edition (C++ · OOP · ANSI / Unicode UI)
+# Othello - Terminal Edition (C++ · OOP · ANSI / Unicode UI)
 A terminal-first reimplementation of Othello (Reversi) written in modern C++.
 No GUI framework — just Unicode glyphs, ANSI color codes, and careful terminal control. This repo showcases algorithmic reasoning (move prediction + flipping), defensive systems programming, and a polished CLI UX. It's one of my most complicated projects so far — predicting valid moves and applying flips correctly across 8 directions produces many edge cases.
 
@@ -10,7 +10,8 @@ Add screenshots or a short gif to `assets/` and reference them here.
 
 Example (replace with your files):
 
-![Board Screenshot](assets/screenshot-1.png)
+<img width="847" height="628" alt="image" src="https://github.com/user-attachments/assets/b866da5d-bf43-4824-b68c-db6ddd1309cf" />
+
 
 ---
 
