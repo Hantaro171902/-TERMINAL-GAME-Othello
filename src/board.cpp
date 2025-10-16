@@ -1,28 +1,44 @@
-#include "headers/board.hpp"
+#include "board.hpp"
 
 #include <cassert>
 #include <cstring>
 
-Board::Board(bool initial)
+Board::Board(int size, bool initial) : boardSize(size)
 {
-    for (int y = 0; y < 8; y++)
-        for (int x = 0; x < 8; x++)
+    // Allocate 2D array
+    grid = new Disk*[boardSize];
+    for (int i = 0; i < boardSize; i++) {
+        grid[i] = new Disk[boardSize];
+    }
+
+    for (int y = 0; y < boardSize; y++)
+        for (int x = 0; x < boardSize; x++)
             grid[y][x] = Disk::Empty;
 
     if (initial)
         reset();
 }
 
+Board::~Board()
+{
+    for (int i = 0; i < boardSize; i++) {
+        delete[] grid[i];
+    }
+    delete[] grid;
+}
+
 void Board::reset()
 {
-    for (int y = 0; y < 8; y++)
-        for (int x = 0; x < 8; x++)
+    for (int y = 0; y < boardSize; y++)
+        for (int x = 0; x < boardSize; x++)
             grid[y][x] = Disk::Empty;
 
-    grid[3][3] = Disk::O;
-    grid[3][4] = Disk::X;
-    grid[4][3] = Disk::X;
-    grid[4][4] = Disk::O;
+    // Set initial pieces in center
+    int center = boardSize / 2;
+    grid[center-1][center-1] = Disk::O;
+    grid[center-1][center] = Disk::X;
+    grid[center][center-1] = Disk::X;
+    grid[center][center] = Disk::O;
 }
 
 Board::Disk Board::get(int x, int y) const
@@ -36,7 +52,7 @@ bool Board::scan(int startX, int startY, int dx, int dy, Disk current) const
     int y = startY + dy;
     bool anyOther = false;
 
-    while (x >= 0 && x < 8 && y >= 0 && y < 8) {
+    while (x >= 0 && x < boardSize && y >= 0 && y < boardSize) {
         if (grid[y][x] == Disk::Empty)
             return false;
 
@@ -69,8 +85,8 @@ bool Board::isValid(int x, int y, Disk current) const
 std::vector<std::pair<int, int>> Board::getValid(Disk current) const
 {
     std::vector<std::pair<int, int>> out;
-    for (int y = 0; y < 8; y++) {
-        for (int x = 0; x < 8; x++) {
+    for (int y = 0; y < boardSize; y++) {
+        for (int x = 0; x < boardSize; x++) {
             if (isValid(x, y, current))
                 out.emplace_back(x, y);
         }
@@ -89,7 +105,7 @@ void Board::scanAndFlip(int startX, int startY, int dx, int dy)
     while (true) {
         x += dx;
         y += dy;
-        if (x < 0 || x >= 8 || y < 0 || y >= 8)
+        if (x < 0 || x >= boardSize || y < 0 || y >= boardSize)
             return;
         if (grid[y][x] == Disk::Empty)
             return;
@@ -128,8 +144,8 @@ void Board::put(int x, int y, Disk current)
 int Board::count(Disk who) const
 {
     int c = 0;
-    for (int y = 0; y < 8; y++)
-        for (int x = 0; x < 8; x++)
+    for (int y = 0; y < boardSize; y++)
+        for (int x = 0; x < boardSize; x++)
             if (grid[y][x] == who)
                 c++;
     return c;

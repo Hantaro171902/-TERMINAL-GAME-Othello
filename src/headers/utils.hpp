@@ -50,3 +50,7 @@ extern const char SYMBOL_DOUBLE_INTERSECT[];
 
 extern const char BLOCK_FULL[];
 extern const char BLOCK_HALF[];
+
+// Othello game symbols
+extern const char WHITE_CIRCLE[];
+extern const char BLACK_CIRCLE[];

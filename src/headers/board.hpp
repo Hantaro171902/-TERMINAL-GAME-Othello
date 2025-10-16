@@ -9,14 +9,17 @@ public:
     enum class Disk { Empty = 0, X, O };
 
 private:
-    Disk grid[8][8];
+    int boardSize;
+    Disk** grid;
 
     bool scan(int startX, int startY, int dx, int dy, Disk current) const;
     void scanAndFlip(int startX, int startY, int dx, int dy);
 
 public:
-    Board(bool initial = true);
+    Board(int size = 8, bool initial = true);
+    ~Board();
     void reset();
+    int getSize() const { return boardSize; }
 
     bool isValid(int x, int y, Disk current) const;
     std::vector<std::pair<int, int>> getValid(Disk current) const;

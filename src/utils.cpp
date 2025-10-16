@@ -184,3 +184,7 @@ const char SYMBOL_DOUBLE_INTERSECT[]    = "\u256C"; // ╬
 
 const char BLOCK_FULL[]   = "\u2588"; // █
 const char BLOCK_HALF[]   = "\u2592"; // ▒
+
+// Othello game symbols
+const char WHITE_CIRCLE[] = "\u25EF"; // ◯
+const char BLACK_CIRCLE[] = "\u2B24"; // ⬤

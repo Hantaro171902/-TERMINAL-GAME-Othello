@@ -1,8 +1,8 @@
-#include "headers/game.hpp"
+#include "game.hpp"
 
 int main()
 {
-    Game g;
-    g.run();
+    Game game;
+    game.run();
     return 0;
 }
